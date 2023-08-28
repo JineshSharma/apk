@@ -1,0 +1,125 @@
+USE [BookDb2]
+GO
+/****** Object:  StoredProcedure [dbo].[GetListOfInvestmentAllotteeWisePIPReport]    Script Date: 8/28/2023 11.25.31 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER proc [dbo].[GetListOfInvestmentAllotteeWisePIPReport] -- [GetListOfInvestmentAllotteeWisePIPReport] 'ALL','ALL','3',null,'24 Dec 2019'
+
+@RegionalOffice varchar(100),
+
+--@IndustrialArea varchar(100),
+
+@ReportType varchar(100),
+
+@Service  varchar(100)=null,
+
+@FromDate       datetime = NULL,
+
+@ToDate         datetime = NULL
+
+
+
+as begin
+if (@ReportType in(2))
+begin
+
+if(@Service in (1))
+begin
+select a.ApplicationId, a.UnitId as 'Nivesh Mitra ID', 
+a.ApplicantName as 'Applicant Name', a.PhoneNo as 'Phone No', 
+a.emailID as 'Email ID', a.ProposedPIP as 'Name Of Industrial Park', 
+a.Address2 as 'Project Location',b.CategoryOfProject as 'category Of Project',
+Convert (varchar,a.ApplicationSubmissionDate,106) As 'Final Submit Date',
+CASE
+    WHEN a.isRejected = 1 THEN 'Rejected'
+    WHEN a.IsCompleted = 1 THEN 'Approved'
+	WHEN a.UnderObjection = 1 THEN 'UnderObjection'
+	WHEN DATEDIFF(DAY, GETDATE(),a.FinalSubmissionDate ) < 60 then 'Pending'
+	WHEN DATEDIFF(DAY, GETDATE(),a.FinalSubmissionDate ) > 60 then 'Pending Beyond Timeline'
+END AS Status
+from PIPRegister a inner join PIPProjectDetails b on a.ApplicantID = b.ApplicantId
+where (convert(date, a.ApplicationSubmissionDate) >= @FromDate and convert(date, a.ApplicationSubmissionDate) <= @ToDate) 
+or convert(date, a.ApplicationSubmissionDate) >= @FromDate or convert(date, a.ApplicationSubmissionDate) <= @ToDate
+
+end
+
+
+
+
+if(@Service in (2))
+begin
+select a.ApplicationId, a.UnitId as 'Nivesh Mitra ID', 
+a.ApplicantName as 'Applicant Name', a.PhoneNo as 'Phone No', 
+a.emailID as 'Email ID', a.ProposedPIP as 'Name Of Industrial Park', 
+a.Address2 as 'Project Location',b.CategoryOfProject as 'category Of Project',
+Convert (varchar,a.ApplicationSubmissionDate,106) As 'Final Submit Date',
+Convert (varchar,a.CompletionDate,106) As 'Approved On'
+from PIPRegister a inner join PIPProjectDetails b on a.ApplicantID = b.ApplicantId where a.IsCompleted = 1
+and( (convert(date, a.ApplicationSubmissionDate) >= @FromDate and convert(date, a.ApplicationSubmissionDate) <= @ToDate) 
+or convert(date, a.ApplicationSubmissionDate) >= @FromDate or convert(date, a.ApplicationSubmissionDate) <= @ToDate)
+end
+
+
+
+if(@Service in (3))
+begin
+select a.ApplicationId, a.UnitId as 'Nivesh Mitra ID', 
+a.ApplicantName as 'Applicant Name', a.PhoneNo as 'Phone No', 
+a.emailID as 'Email ID', a.ProposedPIP as 'Name Of Industrial Park', 
+a.Address2 as 'Project Location',b.CategoryOfProject as 'category Of Project', 
+Convert (varchar,a.ApplicationSubmissionDate,106) As 'Final Submit Date',
+Convert (varchar,a.RejectionDate,106) As 'Rejected On'
+from PIPRegister a inner join PIPProjectDetails b on a.ApplicantID = b.ApplicantId where a.isRejected =1 and(
+(convert(date, a.ApplicationSubmissionDate) >= @FromDate and convert(date, a.ApplicationSubmissionDate) <= @ToDate) 
+or convert(date, a.ApplicationSubmissionDate) >= @FromDate or convert(date, a.ApplicationSubmissionDate) <= @ToDate)
+end
+
+
+
+if(@Service in (4))
+begin
+select a.ApplicationId, a.UnitId as 'Nivesh Mitra ID', 
+a.emailID as 'Email ID', a.ProposedPIP as 'Name Of Industrial Park', 
+a.Address2 as 'Project Location',b.CategoryOfProject as 'category Of Project',
+a.Address1 as 'Project Location',b.CategoryOfProject as 'category Of Project', 
+Convert (varchar,a.ApplicationSubmissionDate,106) As 'Final Submit Date'
+from PIPRegister a inner join PIPProjectDetails b on a.ApplicantID = b.ApplicantId where DATEDIFF(DAY, GETDATE(),a.FinalSubmissionDate ) < 60 and (
+(convert(date, a.ApplicationSubmissionDate) >= @FromDate and convert(date, a.ApplicationSubmissionDate) <= @ToDate) 
+or convert(date, a.ApplicationSubmissionDate) >= @FromDate or convert(date, a.ApplicationSubmissionDate) <= @ToDate)
+end
+
+
+if(@Service in (5))
+begin
+select a.ApplicationId, a.UnitId as 'Nivesh Mitra ID', 
+a.ApplicantName as 'Applicant Name', a.PhoneNo as 'Phone No', 
+a.emailID as 'Email ID', a.ProposedPIP as 'Name Of Industrial Park', 
+a.Address2 as 'Project Location',b.CategoryOfProject as 'category Of Project',
+Convert (varchar,a.ApplicationSubmissionDate,106) As 'Final Submit Date'
+from PIPRegister a inner join PIPProjectDetails b on a.ApplicantID = b.ApplicantId where a.UnderObjection = 1 and (
+(convert(date, a.ApplicationSubmissionDate) >= @FromDate and convert(date, a.ApplicationSubmissionDate) <= @ToDate) 
+or convert(date, a.ApplicationSubmissionDate) >= @FromDate or convert(date, a.ApplicationSubmissionDate) <= @ToDate)
+end
+
+
+if(@Service in (6))
+begin
+select a.ApplicationId, a.UnitId as 'Nivesh Mitra ID', 
+a.ApplicantName as 'Applicant Name', a.PhoneNo as 'Phone No', 
+a.emailID as 'Email ID', a.ProposedPIP as 'Name Of Industrial Park', 
+a.Address2 as 'Project Location',b.CategoryOfProject as 'category Of Project',
+Convert (varchar,a.ApplicationSubmissionDate,106) As 'Final Submit Date'
+from PIPRegister a inner join PIPProjectDetails b on a.ApplicantID = b.ApplicantId where DATEDIFF(DAY, GETDATE(),a.FinalSubmissionDate ) > 60 and (
+(convert(date, a.ApplicationSubmissionDate) >= @FromDate and convert(date, a.ApplicationSubmissionDate) <= @ToDate) 
+or convert(date, a.ApplicationSubmissionDate) >= @FromDate or convert(date, a.ApplicationSubmissionDate) <= @ToDate)
+end
+
+end
+
+--if (@ReportType in (1))
+--Begin
+--Same Work do As above
+--end
+end
